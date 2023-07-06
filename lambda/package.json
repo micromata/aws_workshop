@@ -11,7 +11,9 @@
     "node": ">=16.0"
   },
   "dependencies": {
-    "@types/aws-lambda": "^8.10.119"
+    "@types/aws-lambda": "^8.10.119",
+    "node_module": "^0.0.0",
+    "openai": "^3.3.0"
   },
   "devDependencies": {
     "@types/jest": "^29.5.2",

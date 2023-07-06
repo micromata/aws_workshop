@@ -1,10 +1,11 @@
-import { AssetType, TerraformAsset, TerraformStack } from "cdktf"
+import { AssetType, Fn, TerraformAsset, TerraformStack } from "cdktf"
 import { Construct } from "constructs"
 import { AwsProvider } from "@cdktf/provider-aws/lib/provider"
 import { IamRole } from "@cdktf/provider-aws/lib/iam-role"
 import { LambdaFunction } from "@cdktf/provider-aws/lib/lambda-function"
 
 import { prefixedId } from "../util/names"
+import { LambdaLayerVersion } from "@cdktf/provider-aws/lib/lambda-layer-version"
 
 export class FunctionStack extends TerraformStack {
   constructor(scope: Construct, id: string) {
@@ -12,6 +13,16 @@ export class FunctionStack extends TerraformStack {
 
     new AwsProvider(this, prefixedId("aws-provider"), {
       region: "eu-west-1"
+    })
+
+    const dependencyLayerAsset = new TerraformAsset(this, prefixedId("test-lambda-layer-asset"), {
+      path: "../lambda/dependency-layer/",
+      type: AssetType.ARCHIVE
+    })
+    const dependencyLayer = new LambdaLayerVersion(this, prefixedId("test-lambda-layer"), {
+      layerName: prefixedId("test-lambda-layer"),
+      filename: dependencyLayerAsset.path,
+      sourceCodeHash: Fn.filebase64sha256(dependencyLayerAsset.path)
     })
 
     const lambdaAsset = new TerraformAsset(this, prefixedId("test-lambda-code"), {
@@ -41,7 +52,14 @@ export class FunctionStack extends TerraformStack {
       handler: "conversation.handler",
       runtime: "nodejs18.x",
       filename: lambdaAsset.path,
-      role: executionRole.arn
+      layers: [dependencyLayer.arn],
+      role: executionRole.arn,
+      timeout: 15,
+      environment: {
+        variables: {
+          OPENAI_API_KEY: "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"
+        }
+      }
     })
   }
 }

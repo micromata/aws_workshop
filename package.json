@@ -2,8 +2,7 @@
   "name": "@awsworkshop/root",
   "private": true,
   "workspaces": [
-    "infra",
-    "lambda"
+    "infra"
   ],
   "installConfig": {
     "hoistingLimits": "dependencies"
@@ -13,8 +12,10 @@
     "prettier": "prettier --config .prettierrc.js --write \"**/*.{js,jsx,ts,tsx,json,css,scss}\"",
     "lint": "eslint \"**/*.{js,jsx,ts,tsx}\"",
     "lint:fix": "npm run lint --fix",
-    "build": "npm run build --workspace=lambda",
+    "build:lambda": "cd lambda && npm run build",
+    "package:dependency-layer": "cd lambda && mv node_modules node_modules_dev && npm i --omit=dev && mkdir -p dependency-layer/nodejs && cp -r node_modules dependency-layer/nodejs && rm -rf node_modules && mv node_modules_dev node_modules",
     "deploy": "npm run deploy --workspace=infra",
+    "deploy:ci": "npm run deploy:ci --workspace=infra",
     "diff": "npm run diff --workspace=infra",
     "test": "npm run test --workspace=infra --workspace=lambda"
   },

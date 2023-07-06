@@ -10,6 +10,7 @@
     "build": "../node_modules/.bin/tsc",
     "synth": "cdktf synth",
     "deploy": "cdktf deploy",
+    "deploy:ci": "cdktf deploy --auto-approve",
     "diff": "cdktf diff",
     "compile": "../node_modules/.bin/tsc --pretty",
     "watch": "../node_modules/.bin/tsc -w",
