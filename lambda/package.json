@@ -2,14 +2,17 @@
   "name": "@awsworkshop/lambda",
   "version": "1.0.0",
   "description": "Lambda functions of the application",
-  "main": "chat/conversation.ts",
+  "main": "src/chat/conversation.ts",
   "scripts": {
+    "build": "tsc -p tsconfig.build.json",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "engines": {
     "node": ">=16.0"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@types/aws-lambda": "^8.10.119"
+  },
   "devDependencies": {
     "@types/jest": "^29.5.2",
     "@types/node": "^20.3.3",

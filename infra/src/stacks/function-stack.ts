@@ -15,7 +15,7 @@ export class FunctionStack extends TerraformStack {
     })
 
     const lambdaAsset = new TerraformAsset(this, prefixedId("test-lambda-code"), {
-      path: "../lambda/",
+      path: "../lambda/dist/",
       type: AssetType.ARCHIVE
     })
 
@@ -38,8 +38,8 @@ export class FunctionStack extends TerraformStack {
 
     new LambdaFunction(this, prefixedId("test-function"), {
       functionName: prefixedId("test-function"),
-      handler: "hello_world.handler",
-      runtime: "python3.9",
+      handler: "conversation.handler",
+      runtime: "nodejs18.x",
       filename: lambdaAsset.path,
       role: executionRole.arn
     })
