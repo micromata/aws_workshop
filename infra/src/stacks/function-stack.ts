@@ -57,7 +57,7 @@ export class FunctionStack extends TerraformStack {
       timeout: 15,
       environment: {
         variables: {
-          OPENAI_API_KEY: "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"
+          OPENAI_API_KEY: "--revoked--"
         }
       }
     })
