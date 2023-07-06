@@ -1,13 +1,13 @@
 *.d.ts
 *.js
 node_modules
-cdktf.out
+infra/cdktf.out
 cdktf.log
 *terraform.*.tfstate*
 .gen
 .terraform
 tsconfig.tsbuildinfo
-!jest.config.js
-!setup.js
+!infra/jest.config.js
+!infra/setup.js
 .idea
 *.iml
