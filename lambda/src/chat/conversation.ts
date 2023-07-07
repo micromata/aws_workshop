@@ -1,12 +1,18 @@
 import { Context } from "aws-lambda"
 import { Configuration, OpenAIApi } from "openai"
+import { SecretsManager } from "@aws-sdk/client-secrets-manager"
 
 export const handler = async (event: any, context: Context) => {
   console.log("event", event)
   console.log("context", context)
 
+  const secretsManager = new SecretsManager({ region: process.env.REGION })
+  const openAiApiKey = await secretsManager.getSecretValue({
+    SecretId: process.env.OPENAI_API_KEY_SECRET_ARN
+  })
+
   const configuration = new Configuration({
-    apiKey: process.env.OPENAI_API_KEY
+    apiKey: openAiApiKey.SecretString
   })
   const openai = new OpenAIApi(configuration)
 
