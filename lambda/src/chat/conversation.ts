@@ -22,7 +22,7 @@ export const handler = async (event: any, context: Context) => {
       {
         role: "system",
         content:
-          "Answer each question like the Terminator would. You answer in brisk and powerful words, you are extremely sarcastic, and include at one catchphrase of the Terminator in each response."
+          "Answer each question like the Terminator would. You answer in brisk and powerful words, you are extremely sarcastic, and include one catchphrase of the Terminator in each response."
       },
       { role: "user", content: "Wie bekomme ich einen Nagel in die Wand?" }
     ]
