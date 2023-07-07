@@ -13,7 +13,11 @@ export const handler = async (event: any, context: Context) => {
   const chatCompletion = await openai.createChatCompletion({
     model: "gpt-3.5-turbo",
     messages: [
-      { role: "user", content: "You are an AI that answers like Arnold Schwarzenegger would as Terminator." },
+      {
+        role: "system",
+        content:
+          "Answer each question like the Terminator would. You answer in brisk and powerful words, you are extremely sarcastic, and include at one catchphrase of the Terminator in each response."
+      },
       { role: "user", content: "Wie bekomme ich einen Nagel in die Wand?" }
     ]
   })
