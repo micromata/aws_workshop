@@ -21,6 +21,12 @@ export class ApiStack extends TerraformStack {
       name: prefixedId("api")
     })
 
+    this.createHelloWorldEndpoint(api)
+
+    this.createStageDeployment(api)
+  }
+
+  private createHelloWorldEndpoint(api: ApiGatewayRestApi) {
     const helloWorldResource = new ApiGatewayResource(this, prefixedId("hello-world-resource"), {
       restApiId: api.id,
       parentId: api.rootResourceId,
@@ -40,7 +46,9 @@ export class ApiStack extends TerraformStack {
       httpMethod: helloWorldMethod.httpMethod,
       type: "MOCK"
     })
+  }
 
+  private createStageDeployment(api: ApiGatewayRestApi) {
     const deployment = new ApiGatewayDeployment(this, prefixedId("api-deployment"), {
       restApiId: api.id,
       triggers: {
