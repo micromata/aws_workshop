@@ -27,5 +27,9 @@ export const handler = async (event: any, context: Context) => {
       { role: "user", content: "Wie bekomme ich einen Nagel in die Wand?" }
     ]
   })
-  return chatCompletion.data.choices[0].message
+
+  return {
+    statusCode: 200,
+    body: JSON.stringify(chatCompletion.data.choices[0].message)
+  }
 }
