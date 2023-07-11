@@ -45,6 +45,9 @@ export class ApiStack extends TerraformStack {
       restApiId: api.id,
       triggers: {
         redeploymentTrigger: Date.now().toString() // triggers stage redeployment on every stack deployment
+      },
+      lifecycle: {
+        createBeforeDestroy: true // delete active stages pointing to this deployment before attempting a redeployment
       }
     })
 
