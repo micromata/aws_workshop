@@ -6,7 +6,9 @@ import { FrontendStack } from "./src/stacks/frontend-stack"
 import { ApiStack } from "./src/stacks/api-stack"
 
 const app = new App()
-new FunctionStack(app, prefixedId("function-stack"))
+const functionStack = new FunctionStack(app, prefixedId("function-stack"))
 new FrontendStack(app, prefixedId("frontend-stack"))
-new ApiStack(app, prefixedId("api-stack"))
+new ApiStack(app, prefixedId("api-stack"), {
+  chatLambdaFunction: functionStack.chatLambdaFunction
+})
 app.synth()

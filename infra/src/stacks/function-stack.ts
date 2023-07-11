@@ -10,6 +10,8 @@ import { SecretsmanagerSecret } from "@cdktf/provider-aws/lib/secretsmanager-sec
 import { SecretsmanagerSecretVersion } from "@cdktf/provider-aws/lib/secretsmanager-secret-version"
 
 export class FunctionStack extends TerraformStack {
+  readonly chatLambdaFunction: LambdaFunction
+
   constructor(scope: Construct, id: string) {
     super(scope, id)
 
@@ -73,7 +75,7 @@ export class FunctionStack extends TerraformStack {
       ]
     })
 
-    new LambdaFunction(this, prefixedId("test-function"), {
+    this.chatLambdaFunction = new LambdaFunction(this, prefixedId("test-function"), {
       functionName: prefixedId("test-function"),
       handler: "conversation.handler",
       runtime: "nodejs18.x",
