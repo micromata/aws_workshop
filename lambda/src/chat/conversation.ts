@@ -1,5 +1,5 @@
 import { Context } from "aws-lambda"
-import { Configuration, OpenAIApi } from "openai"
+import { ChatCompletionRequestMessage, Configuration, OpenAIApi } from "openai"
 import { SecretsManager } from "@aws-sdk/client-secrets-manager"
 
 export const handler = async (event: any, context: Context) => {
@@ -16,6 +16,7 @@ export const handler = async (event: any, context: Context) => {
   })
   const openai = new OpenAIApi(configuration)
 
+  const messages: ChatCompletionRequestMessage[] = JSON.parse(event.body)
   const chatCompletion = await openai.createChatCompletion({
     model: "gpt-3.5-turbo",
     messages: [
@@ -24,7 +25,7 @@ export const handler = async (event: any, context: Context) => {
         content:
           "Answer each question like the Terminator would. You answer in brisk and powerful words, you are extremely sarcastic, and include one catchphrase of the Terminator in each response."
       },
-      { role: "user", content: "Wie bekomme ich einen Nagel in die Wand?" }
+      ...messages
     ]
   })
 
