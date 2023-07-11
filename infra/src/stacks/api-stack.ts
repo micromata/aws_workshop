@@ -40,7 +40,7 @@ export class ApiStack extends TerraformStack {
       authorization: "NONE"
     })
 
-    new ApiGatewayIntegration(this, "HelloWorldMockIntegration", {
+    new ApiGatewayIntegration(this, prefixedId("hello-world-mock-integration"), {
       restApiId: api.id,
       resourceId: helloWorldResource.id,
       httpMethod: helloWorldMethod.httpMethod,
