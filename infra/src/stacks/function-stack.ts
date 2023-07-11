@@ -72,7 +72,8 @@ export class FunctionStack extends TerraformStack {
             ]
           })
         }
-      ]
+      ],
+      managedPolicyArns: ["arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"]
     })
 
     this.chatLambdaFunction = new LambdaFunction(this, prefixedId("test-function"), {
