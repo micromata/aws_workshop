@@ -76,7 +76,13 @@ export class ApiStack extends TerraformStack {
       authorization: "NONE"
     })
 
-    const integration = new ApiGatewayIntegration(this, prefixedId("chat-integration"), {
+    new LambdaPermission(this, prefixedId("chat-lambda-invoke-permission"), {
+      action: "lambda:InvokeFunction",
+      functionName: chatLambdaFunction.functionName,
+      principal: "apigateway.amazonaws.com"
+    })
+
+    return new ApiGatewayIntegration(this, prefixedId("chat-integration"), {
       restApiId: api.id,
       resourceId: chatResource.id,
       httpMethod: chatMethod.httpMethod,
@@ -84,14 +90,6 @@ export class ApiStack extends TerraformStack {
       integrationHttpMethod: "POST",
       uri: chatLambdaFunction.invokeArn
     })
-
-    new LambdaPermission(this, prefixedId("chat-lambda-invoke-permission"), {
-      action: "lambda:InvokeFunction",
-      functionName: chatLambdaFunction.functionName,
-      principal: "apigateway.amazonaws.com"
-    })
-
-    return integration
   }
 
   private createFrontendEndpoint(api: ApiGatewayRestApi, frontendBucket: S3Bucket) {
@@ -131,7 +129,7 @@ export class ApiStack extends TerraformStack {
       }
     })
 
-    new ApiGatewayIntegrationResponse(this, prefixedId("integrationResponse"), {
+    new ApiGatewayIntegrationResponse(this, prefixedId("integration-response"), {
       restApiId: api.id,
       resourceId: frontendResource.id,
       statusCode: "200",
@@ -164,7 +162,7 @@ export class ApiStack extends TerraformStack {
               {
                 Action: ["s3:ListBucket", "s3:GetObject"],
                 Effect: "Allow",
-                Resource: "arn:aws:s3:::sk-aws-workshop-static-website-hosting/index.html"
+                Resource: `arn:aws:s3:::${prefixedId('static-website-hosting/index.html')}`
               }
             ]
           })
@@ -172,7 +170,7 @@ export class ApiStack extends TerraformStack {
       ]
     })
 
-    const integration = new ApiGatewayIntegration(this, prefixedId("frontend-integration"), {
+    return new ApiGatewayIntegration(this, prefixedId("frontend-integration"), {
       restApiId: api.id,
       resourceId: frontendResource.id,
       httpMethod: frontendMethod.httpMethod,
@@ -181,8 +179,6 @@ export class ApiStack extends TerraformStack {
       integrationHttpMethod: "GET",
       type: "AWS"
     })
-
-    return integration
   }
 
   private createStageDeployment(

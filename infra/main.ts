@@ -15,4 +15,5 @@ const apiStack = new ApiStack(app, prefixedId("api-stack"), {
 
 apiStack.addDependency(functionStack)
 apiStack.addDependency(frontendStack)
+
 app.synth()
