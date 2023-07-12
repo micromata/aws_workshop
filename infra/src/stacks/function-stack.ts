@@ -7,8 +7,6 @@ import { LambdaFunction } from "@cdktf/provider-aws/lib/lambda-function"
 import { prefixedId } from "../util/names"
 
 export class FunctionStack extends TerraformStack {
-  readonly chatLambdaFunction: LambdaFunction
-
   constructor(scope: Construct, id: string) {
     super(scope, id)
 
@@ -39,7 +37,7 @@ export class FunctionStack extends TerraformStack {
       managedPolicyArns: ["arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"]
     })
 
-    this.chatLambdaFunction = new LambdaFunction(this, prefixedId("test-function"), {
+    new LambdaFunction(this, prefixedId("test-function"), {
       functionName: prefixedId("test-function"),
       handler: "conversation.handler",
       runtime: "nodejs18.x",
