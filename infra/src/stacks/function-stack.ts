@@ -6,6 +6,8 @@ import { LambdaFunction } from "@cdktf/provider-aws/lib/lambda-function"
 
 import { prefixedId } from "../util/names"
 import { LambdaLayerVersion } from "@cdktf/provider-aws/lib/lambda-layer-version"
+import { SecretsmanagerSecret } from "@cdktf/provider-aws/lib/secretsmanager-secret"
+import { SecretsmanagerSecretVersion } from "@cdktf/provider-aws/lib/secretsmanager-secret-version"
 
 export class FunctionStack extends TerraformStack {
   readonly chatLambdaFunction: LambdaFunction
@@ -32,6 +34,15 @@ export class FunctionStack extends TerraformStack {
       type: AssetType.ARCHIVE
     })
 
+    const openAiApiKeySecret = new SecretsmanagerSecret(this, prefixedId("openai-api-key"), {
+      name: prefixedId("openai-api-key"),
+      description: "API Key for OpenAI API"
+    })
+    new SecretsmanagerSecretVersion(this, prefixedId("openai-api-key-secret-version"), {
+      secretId: openAiApiKeySecret.id,
+      secretString: "placeholder value"
+    })
+
     const executionRole = new IamRole(this, prefixedId("test-lambda-role"), {
       name: prefixedId("test-lambda-role"),
       assumeRolePolicy: JSON.stringify({
@@ -47,6 +58,21 @@ export class FunctionStack extends TerraformStack {
           }
         ]
       }),
+      inlinePolicy: [
+        {
+          name: "openai-api-key-access",
+          policy: JSON.stringify({
+            Version: "2012-10-17",
+            Statement: [
+              {
+                Action: ["secretsmanager:GetSecretValue"],
+                Effect: "Allow",
+                Resource: openAiApiKeySecret.arn
+              }
+            ]
+          })
+        }
+      ],
       managedPolicyArns: ["arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"]
     })
 
@@ -59,7 +85,9 @@ export class FunctionStack extends TerraformStack {
       timeout: 15,
       layers: [dependencyLayer.arn],
       environment: {
-        variables: {}
+        variables: {
+          OPENAI_API_KEY_SECRET_ARN: openAiApiKeySecret.arn
+        }
       }
     })
   }
