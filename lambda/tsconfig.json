@@ -1,9 +1,9 @@
 {
-    "extends": "../tsconfig.json",
-    "include": ["./src/**/*", "./test/**/*"],
-    "exclude": ["dist", "node_modules", "**/__mocks__/*"],
-    "compilerOptions": {
-        "outDir": "./dist",
-        "typeRoots": ["../../node_modules/@types", "./node_modules/@types"]
-    }
+  "extends": "../tsconfig.json",
+  "include": ["./src/**/*", "./test/**/*"],
+  "exclude": ["dist", "node_modules", "**/__mocks__/*"],
+  "compilerOptions": {
+    "outDir": "./dist",
+    "typeRoots": ["../../node_modules/@types", "./node_modules/@types"]
+  }
 }

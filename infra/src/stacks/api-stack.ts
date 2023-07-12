@@ -10,9 +10,15 @@ import { ApiGatewayResource } from "@cdktf/provider-aws/lib/api-gateway-resource
 import { ApiGatewayIntegration } from "@cdktf/provider-aws/lib/api-gateway-integration"
 import { LambdaFunction } from "@cdktf/provider-aws/lib/lambda-function"
 import { LambdaPermission } from "@cdktf/provider-aws/lib/lambda-permission"
+import { S3Bucket } from "@cdktf/provider-aws/lib/s3-bucket"
+import { IamRole } from "@cdktf/provider-aws/lib/iam-role"
+import { apiGatewayGatewayResponse } from "@cdktf/provider-aws"
+import { ApiGatewayMethodResponse } from "@cdktf/provider-aws/lib/api-gateway-method-response"
+import { ApiGatewayIntegrationResponse } from "@cdktf/provider-aws/lib/api-gateway-integration-response"
 
 interface Props {
   chatLambdaFunction: LambdaFunction
+  frontendBucket: S3Bucket
 }
 
 export class ApiStack extends TerraformStack {
@@ -28,9 +34,10 @@ export class ApiStack extends TerraformStack {
     })
 
     this.createHelloWorldEndpoint(api)
-    this.createChatEndpoint(api, props.chatLambdaFunction)
+    const chatIntegration = this.createChatEndpoint(api, props.chatLambdaFunction)
+    const frontendIntegration = this.createFrontendEndpoint(api, props.frontendBucket)
 
-    this.createStageDeployment(api)
+    this.createStageDeployment(api, chatIntegration, frontendIntegration)
   }
 
   private createHelloWorldEndpoint(api: ApiGatewayRestApi) {
@@ -69,7 +76,7 @@ export class ApiStack extends TerraformStack {
       authorization: "NONE"
     })
 
-    new ApiGatewayIntegration(this, prefixedId("chat-integration"), {
+    const integration = new ApiGatewayIntegration(this, prefixedId("chat-integration"), {
       restApiId: api.id,
       resourceId: chatResource.id,
       httpMethod: chatMethod.httpMethod,
@@ -83,11 +90,109 @@ export class ApiStack extends TerraformStack {
       functionName: chatLambdaFunction.functionName,
       principal: "apigateway.amazonaws.com"
     })
+
+    return integration
   }
 
-  private createStageDeployment(api: ApiGatewayRestApi) {
+  private createFrontendEndpoint(api: ApiGatewayRestApi, frontendBucket: S3Bucket) {
+    const frontendResource = new ApiGatewayResource(this, prefixedId("frontend-resource"), {
+      restApiId: api.id,
+      parentId: api.rootResourceId,
+      pathPart: "frontend"
+    })
+
+    const frontendMethod = new ApiGatewayMethod(this, prefixedId("frontend-method"), {
+      restApiId: api.id,
+      resourceId: frontendResource.id,
+      httpMethod: "GET",
+      authorization: "NONE"
+    })
+
+    new apiGatewayGatewayResponse.ApiGatewayGatewayResponse(this, prefixedId("api-gateway-response"), {
+      restApiId: api.id,
+      statusCode: "200",
+      responseTemplates: {
+        "text/html": "Empty"
+      },
+      responseType: "DEFAULT_5XX"
+    })
+    new ApiGatewayMethodResponse(this, prefixedId("method-response"), {
+      restApiId: api.id,
+      resourceId: frontendResource.id,
+      httpMethod: "GET",
+      responseModels: {
+        "text/html": "Empty"
+      },
+      statusCode: "200",
+      responseParameters: {
+        "method.response.header.Content-Type": true,
+        "method.response.header.Access-Control-Allow-Origin": true,
+        "method.response.header.Access-Control-Allow-Credentials": true
+      }
+    })
+
+    new ApiGatewayIntegrationResponse(this, prefixedId("integrationResponse"), {
+      restApiId: api.id,
+      resourceId: frontendResource.id,
+      statusCode: "200",
+      httpMethod: "GET",
+      responseParameters: {
+        "method.response.header.Content-Type": "integration.response.header.Content-Type"
+      }
+    })
+
+    const frontendRole = new IamRole(this, prefixedId("frontend-role"), {
+      assumeRolePolicy: JSON.stringify({
+        Version: "2012-10-17",
+        Statement: [
+          {
+            Action: "sts:AssumeRole",
+            Principal: {
+              Service: "apigateway.amazonaws.com"
+            },
+            Effect: "Allow",
+            Sid: ""
+          }
+        ]
+      }),
+      inlinePolicy: [
+        {
+          name: "frontend-apigateway-policy",
+          policy: JSON.stringify({
+            Version: "2012-10-17",
+            Statement: [
+              {
+                Action: ["s3:ListBucket", "s3:GetObject"],
+                Effect: "Allow",
+                Resource: "arn:aws:s3:::sk-aws-workshop-static-website-hosting/index.html"
+              }
+            ]
+          })
+        }
+      ]
+    })
+
+    const integration = new ApiGatewayIntegration(this, prefixedId("frontend-integration"), {
+      restApiId: api.id,
+      resourceId: frontendResource.id,
+      httpMethod: frontendMethod.httpMethod,
+      credentials: frontendRole.arn,
+      uri: `arn:aws:apigateway:eu-west-1:s3:path/${frontendBucket.bucket}/index.html`,
+      integrationHttpMethod: "GET",
+      type: "AWS"
+    })
+
+    return integration
+  }
+
+  private createStageDeployment(
+    api: ApiGatewayRestApi,
+    chatIntegration: ApiGatewayIntegration,
+    frontendIntegration: ApiGatewayIntegration
+  ) {
     const deployment = new ApiGatewayDeployment(this, prefixedId("api-deployment"), {
       restApiId: api.id,
+      dependsOn: [chatIntegration, frontendIntegration],
       triggers: {
         redeploymentTrigger: Date.now().toString() // triggers stage redeployment on every stack deployment
       },

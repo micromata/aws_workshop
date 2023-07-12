@@ -69,7 +69,7 @@
   <body>
     <div class="content-wrapper">
       <div class="content">
-        <div class="chat-bubble bot-message">Hello &#128512; Ask me a question!</div>
+        <div class="chat-bubble bot-message">Hallo &#128512;</div>
       </div>
       <div class="chat-bubble bot-message loading hidden">...</div>
     </div>
@@ -103,9 +103,9 @@
             .then(data => {
                 messages.push(data)
 
-                loadingIndicator.classList.add("hidden")
-                chatContent.innerHTML += `<div class="chat-bubble bot-message">${JSON.stringify(data)}</div>`;
-                window.scrollTo(0, document.body.scrollHeight);
+              loadingIndicator.classList.add("hidden")
+              chatContent.innerHTML += `<div class="chat-bubble bot-message">${data.content}</div>`;
+              window.scrollTo(0, document.body.scrollHeight);
             })
             .catch((error) => {
                 console.error('Error:', error);

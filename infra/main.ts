@@ -7,8 +7,12 @@ import { ApiStack } from "./src/stacks/api-stack"
 
 const app = new App()
 const functionStack = new FunctionStack(app, prefixedId("function-stack"))
-new FrontendStack(app, prefixedId("frontend-stack"))
-new ApiStack(app, prefixedId("api-stack"), {
-  chatLambdaFunction: functionStack.chatLambdaFunction
+const frontendStack = new FrontendStack(app, prefixedId("frontend-stack"))
+const apiStack = new ApiStack(app, prefixedId("api-stack"), {
+  chatLambdaFunction: functionStack.chatLambdaFunction,
+  frontendBucket: frontendStack.frontendBucket
 })
+
+apiStack.addDependency(functionStack)
+apiStack.addDependency(frontendStack)
 app.synth()
