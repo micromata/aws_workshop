@@ -16,7 +16,7 @@
         margin: 0 auto;
         font-family: system-ui, sans-serif;
       }
-      .content {
+      .content-wrapper, .content {
         flex: 1 0 auto;
       }
       .footer {
@@ -61,11 +61,17 @@
         background: linear-gradient(to right, #0b93f6, #4db8ff);
         cursor: pointer;
       }
+      .chat-bubble.loading.hidden {
+        display: none;
+      }
     </style>
   </head>
   <body>
-    <div class="content">
-      <div class="chat-bubble bot-message">Hello &#128512; Ask me a question!</div>
+    <div class="content-wrapper">
+      <div class="content">
+        <div class="chat-bubble bot-message">Hello &#128512; Ask me a question!</div>
+      </div>
+      <div class="chat-bubble bot-message loading hidden">...</div>
     </div>
     <div class="footer">
       <div class="chat-input-area">
@@ -78,6 +84,7 @@
       const input = document.querySelector(".chat-input");
       const button = document.querySelector(".chat-send-button");
       const chatContent = document.querySelector(".content");
+      const loadingIndicator = document.querySelector(".chat-bubble.loading");
 
       const messages = []
 
@@ -90,16 +97,19 @@
         window.scrollTo(0, document.body.scrollHeight);
         input.value = "";
 
+        loadingIndicator.classList.remove("hidden")
         fetch('/latest/chat', { method: 'POST', body: JSON.stringify(messages) })
             .then(response => response.json())
             .then(data => {
                 messages.push(data)
 
+                loadingIndicator.classList.add("hidden")
                 chatContent.innerHTML += `<div class="chat-bubble bot-message">${JSON.stringify(data)}</div>`;
                 window.scrollTo(0, document.body.scrollHeight);
             })
             .catch((error) => {
                 console.error('Error:', error);
+                loadingIndicator.classList.add("hidden")
                 chatContent.innerHTML += `<div class="chat-bubble bot-message">error: ${error.message}</div>`;
                 window.scrollTo(0, document.body.scrollHeight);
             });
