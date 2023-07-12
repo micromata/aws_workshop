@@ -93,15 +93,9 @@ export class ApiStack extends TerraformStack {
   }
 
   private createFrontendEndpoint(api: ApiGatewayRestApi, frontendBucket: S3Bucket) {
-    const frontendResource = new ApiGatewayResource(this, prefixedId("frontend-resource"), {
-      restApiId: api.id,
-      parentId: api.rootResourceId,
-      pathPart: "frontend"
-    })
-
     const frontendMethod = new ApiGatewayMethod(this, prefixedId("frontend-method"), {
       restApiId: api.id,
-      resourceId: frontendResource.id,
+      resourceId: api.rootResourceId,
       httpMethod: "GET",
       authorization: "NONE"
     })
@@ -138,7 +132,7 @@ export class ApiStack extends TerraformStack {
               {
                 Action: ["s3:ListBucket", "s3:GetObject"],
                 Effect: "Allow",
-                Resource: `arn:aws:s3:::${prefixedId('static-website-hosting/index.html')}`
+                Resource: `arn:aws:s3:::${prefixedId("static-website-hosting/index.html")}`
               }
             ]
           })
@@ -146,9 +140,9 @@ export class ApiStack extends TerraformStack {
       ]
     })
 
-    const integration =  new ApiGatewayIntegration(this, prefixedId("frontend-integration"), {
+    const integration = new ApiGatewayIntegration(this, prefixedId("frontend-integration"), {
       restApiId: api.id,
-      resourceId: frontendResource.id,
+      resourceId: api.rootResourceId,
       httpMethod: frontendMethod.httpMethod,
       credentials: frontendRole.arn,
       uri: `arn:aws:apigateway:eu-west-1:s3:path/${frontendBucket.bucket}/index.html`,
@@ -156,10 +150,9 @@ export class ApiStack extends TerraformStack {
       type: "AWS"
     })
 
-
     new ApiGatewayIntegrationResponse(this, prefixedId("integration-response"), {
       restApiId: api.id,
-      resourceId: frontendResource.id,
+      resourceId: api.rootResourceId,
       statusCode: "200",
       httpMethod: "GET",
       dependsOn: [integration]
@@ -167,7 +160,7 @@ export class ApiStack extends TerraformStack {
 
     new ApiGatewayMethodResponse(this, prefixedId("method-response"), {
       restApiId: api.id,
-      resourceId: frontendResource.id,
+      resourceId: api.rootResourceId,
       httpMethod: "GET",
       responseModels: {
         "text/html": "Empty"
