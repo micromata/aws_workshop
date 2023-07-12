@@ -134,9 +134,6 @@ export class ApiStack extends TerraformStack {
       resourceId: frontendResource.id,
       statusCode: "200",
       httpMethod: "GET",
-      responseParameters: {
-        "method.response.header.Content-Type": "integration.response.header.Content-Type"
-      }
     })
 
     const frontendRole = new IamRole(this, prefixedId("frontend-role"), {

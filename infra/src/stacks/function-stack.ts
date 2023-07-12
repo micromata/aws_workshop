@@ -8,6 +8,7 @@ import { prefixedId } from "../util/names"
 import { LambdaLayerVersion } from "@cdktf/provider-aws/lib/lambda-layer-version"
 import { SecretsmanagerSecret } from "@cdktf/provider-aws/lib/secretsmanager-secret"
 import { SecretsmanagerSecretVersion } from "@cdktf/provider-aws/lib/secretsmanager-secret-version"
+import {randomUUID} from "crypto";
 
 export class FunctionStack extends TerraformStack {
   readonly chatLambdaFunction: LambdaFunction
@@ -35,7 +36,7 @@ export class FunctionStack extends TerraformStack {
     })
 
     const openAiApiKeySecret = new SecretsmanagerSecret(this, prefixedId("openai-api-key"), {
-      name: prefixedId("openai-api-key"),
+      name: prefixedId("openai-api-key") + "-" + randomUUID(),
       description: "API Key for OpenAI API"
     })
     new SecretsmanagerSecretVersion(this, prefixedId("openai-api-key-secret-version"), {
