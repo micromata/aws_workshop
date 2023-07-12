@@ -7,7 +7,6 @@ import * as path from "path"
 import { AwsProvider } from "@cdktf/provider-aws/lib/provider"
 
 export class FrontendStack extends TerraformStack {
-  readonly frontendBucket: S3Bucket
   constructor(scope: Construct, id: string) {
     super(scope, id)
 
@@ -29,7 +28,5 @@ export class FrontendStack extends TerraformStack {
       contentType: "text/html",
       sourceHash: Fn.filebase64sha256(resolvedPath)
     })
-
-    this.frontendBucket = frontendBucket
   }
 }
