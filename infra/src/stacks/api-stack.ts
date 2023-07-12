@@ -114,27 +114,6 @@ export class ApiStack extends TerraformStack {
       },
       responseType: "DEFAULT_5XX"
     })
-    new ApiGatewayMethodResponse(this, prefixedId("method-response"), {
-      restApiId: api.id,
-      resourceId: frontendResource.id,
-      httpMethod: "GET",
-      responseModels: {
-        "text/html": "Empty"
-      },
-      statusCode: "200",
-      responseParameters: {
-        "method.response.header.Content-Type": true,
-        "method.response.header.Access-Control-Allow-Origin": true,
-        "method.response.header.Access-Control-Allow-Credentials": true
-      }
-    })
-
-    new ApiGatewayIntegrationResponse(this, prefixedId("integration-response"), {
-      restApiId: api.id,
-      resourceId: frontendResource.id,
-      statusCode: "200",
-      httpMethod: "GET",
-    })
 
     const frontendRole = new IamRole(this, prefixedId("frontend-role"), {
       assumeRolePolicy: JSON.stringify({
@@ -167,7 +146,7 @@ export class ApiStack extends TerraformStack {
       ]
     })
 
-    return new ApiGatewayIntegration(this, prefixedId("frontend-integration"), {
+    const integration =  new ApiGatewayIntegration(this, prefixedId("frontend-integration"), {
       restApiId: api.id,
       resourceId: frontendResource.id,
       httpMethod: frontendMethod.httpMethod,
@@ -176,6 +155,33 @@ export class ApiStack extends TerraformStack {
       integrationHttpMethod: "GET",
       type: "AWS"
     })
+
+
+    new ApiGatewayIntegrationResponse(this, prefixedId("integration-response"), {
+      restApiId: api.id,
+      resourceId: frontendResource.id,
+      statusCode: "200",
+      httpMethod: "GET",
+      dependsOn: [integration]
+    })
+
+    new ApiGatewayMethodResponse(this, prefixedId("method-response"), {
+      restApiId: api.id,
+      resourceId: frontendResource.id,
+      httpMethod: "GET",
+      responseModels: {
+        "text/html": "Empty"
+      },
+      statusCode: "200",
+      responseParameters: {
+        "method.response.header.Content-Type": true,
+        "method.response.header.Access-Control-Allow-Origin": true,
+        "method.response.header.Access-Control-Allow-Credentials": true
+      },
+      dependsOn: [integration]
+    })
+
+    return integration
   }
 
   private createStageDeployment(
