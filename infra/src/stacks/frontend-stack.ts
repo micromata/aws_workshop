@@ -2,7 +2,7 @@ import { Fn, TerraformStack } from "cdktf"
 import { Construct } from "constructs"
 import { S3Bucket } from "@cdktf/provider-aws/lib/s3-bucket"
 import { prefixedId } from "../util/names"
-import { S3BucketObject } from "@cdktf/provider-aws/lib/s3-bucket-object"
+import { S3Object } from "@cdktf/provider-aws/lib/s3-object"
 import * as path from "path"
 import { AwsProvider } from "@cdktf/provider-aws/lib/provider"
 
@@ -22,7 +22,7 @@ export class FrontendStack extends TerraformStack {
 
     const resolvedPath = path.resolve("../frontend/index.html")
 
-    new S3BucketObject(this, prefixedId("index-deployment"), {
+    new S3Object(this, prefixedId("index-deployment"), {
       dependsOn: [this.frontendBucket],
       key: "index.html",
       bucket: this.frontendBucket.bucket,
