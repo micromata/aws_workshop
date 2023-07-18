@@ -1,4 +1,4 @@
-import { TerraformStack } from "cdktf"
+import { ITerraformDependable, TerraformStack } from "cdktf"
 import { Construct } from "constructs"
 import { prefixedId } from "../util/names"
 import { AwsProvider } from "@cdktf/provider-aws/lib/provider"
@@ -33,11 +33,11 @@ export class ApiStack extends TerraformStack {
       name: prefixedId("api")
     })
 
-    this.createHelloWorldEndpoint(api)
+    const helloWorld = this.createHelloWorldEndpoint(api)
     const chatIntegration = this.createChatEndpoint(api, props.chatLambdaFunction)
     const frontendIntegration = this.createFrontendEndpoint(api, props.frontendBucket)
 
-    this.createStageDeployment(api, chatIntegration, frontendIntegration)
+    this.createStageDeployment(api, helloWorld, chatIntegration, frontendIntegration)
   }
 
   private createHelloWorldEndpoint(api: ApiGatewayRestApi) {
@@ -54,7 +54,7 @@ export class ApiStack extends TerraformStack {
       authorization: "NONE"
     })
 
-    new ApiGatewayIntegration(this, prefixedId("hello-world-mock-integration"), {
+    return new ApiGatewayIntegration(this, prefixedId("hello-world-mock-integration"), {
       restApiId: api.id,
       resourceId: helloWorldResource.id,
       httpMethod: helloWorldMethod.httpMethod,
@@ -177,14 +177,10 @@ export class ApiStack extends TerraformStack {
     return integration
   }
 
-  private createStageDeployment(
-    api: ApiGatewayRestApi,
-    chatIntegration: ApiGatewayIntegration,
-    frontendIntegration: ApiGatewayIntegration
-  ) {
+  private createStageDeployment(api: ApiGatewayRestApi, ...dependencies: ITerraformDependable[]) {
     const deployment = new ApiGatewayDeployment(this, prefixedId("api-deployment"), {
       restApiId: api.id,
-      dependsOn: [chatIntegration, frontendIntegration],
+      dependsOn: [...dependencies],
       triggers: {
         redeploymentTrigger: Date.now().toString() // triggers stage redeployment on every stack deployment
       },

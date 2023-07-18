@@ -81,9 +81,9 @@ export class FunctionStack extends TerraformStack {
       handler: "conversation.handler",
       runtime: "nodejs18.x",
       filename: lambdaAsset.path,
-      layers: [dependencyLayer.arn],
       role: executionRole.arn,
       timeout: 15,
+      layers: [dependencyLayer.arn],
       environment: {
         variables: {
           OPENAI_API_KEY_SECRET_ARN: openAiApiKeySecret.arn
