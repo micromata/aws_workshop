@@ -3,11 +3,11 @@ import { Construct } from "constructs"
 import { AwsProvider } from "@cdktf/provider-aws/lib/provider"
 import { IamRole } from "@cdktf/provider-aws/lib/iam-role"
 import { LambdaFunction } from "@cdktf/provider-aws/lib/lambda-function"
-
-import { prefixedId } from "../util/names"
 import { LambdaLayerVersion } from "@cdktf/provider-aws/lib/lambda-layer-version"
 import { SecretsmanagerSecret } from "@cdktf/provider-aws/lib/secretsmanager-secret"
 import { SecretsmanagerSecretVersion } from "@cdktf/provider-aws/lib/secretsmanager-secret-version"
+
+import { prefixedId } from "../util/names"
 
 export class FunctionStack extends TerraformStack {
   readonly chatLambdaFunction: LambdaFunction
@@ -20,8 +20,8 @@ export class FunctionStack extends TerraformStack {
     })
 
     const dependencyLayerAsset = new TerraformAsset(this, prefixedId("test-lambda-layer-asset"), {
-      path: "../lambda/dependency-layer/",
-      type: AssetType.ARCHIVE
+      path: "../lambda/dependency-layer.zip",
+      type: AssetType.FILE
     })
     const dependencyLayer = new LambdaLayerVersion(this, prefixedId("test-lambda-layer"), {
       layerName: prefixedId("test-lambda-layer"),
