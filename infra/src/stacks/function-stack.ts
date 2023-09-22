@@ -35,7 +35,7 @@ export class FunctionStack extends TerraformStack {
     })
 
     const openAiApiKeySecret = new SecretsmanagerSecret(this, prefixedId("openai-api-key"), {
-      name: prefixedId("openai-api-key"),
+      name: prefixedId("openai-api-key-s8"),
       description: "API Key for OpenAI API"
     })
     new SecretsmanagerSecretVersion(this, prefixedId("openai-api-key-secret-version"), {
