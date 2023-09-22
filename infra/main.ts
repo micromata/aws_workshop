@@ -9,8 +9,7 @@ const app = new App()
 const functionStack = new FunctionStack(app, prefixedId("function-stack"))
 const frontendStack = new FrontendStack(app, prefixedId("frontend-stack"))
 const apiStack = new ApiStack(app, prefixedId("api-stack"), {
-  chatLambdaFunction: functionStack.chatLambdaFunction,
-  frontendBucket: frontendStack.frontendBucket
+  chatLambdaFunction: functionStack.chatLambdaFunction
 })
 
 apiStack.addDependency(functionStack)

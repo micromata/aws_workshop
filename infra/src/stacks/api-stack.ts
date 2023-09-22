@@ -8,13 +8,11 @@ import { ApiGatewayMethod } from "@cdktf/provider-aws/lib/api-gateway-method"
 import { ApiGatewayResource } from "@cdktf/provider-aws/lib/api-gateway-resource"
 import { ApiGatewayIntegration } from "@cdktf/provider-aws/lib/api-gateway-integration"
 import { LambdaFunction } from "@cdktf/provider-aws/lib/lambda-function"
-import { S3Bucket } from "@cdktf/provider-aws/lib/s3-bucket"
 
 import { prefixedId } from "../util/names"
 
 interface Props {
   chatLambdaFunction: LambdaFunction
-  frontendBucket: S3Bucket
 }
 
 export class ApiStack extends TerraformStack {
